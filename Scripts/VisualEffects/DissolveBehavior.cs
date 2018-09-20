@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TriggerBehavior
+namespace LUTD.VisualEffects
 {
     public class DissolveBehavior : MonoBehaviour
     {

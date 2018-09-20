@@ -12,8 +12,8 @@ namespace GameServices.MobileInputService
     public sealed class VirtualJoyStick : JoyStick
     {
         [SerializeField]
-        private int m_movementRadius = 50;
-        public int MovementRadius { get { return m_movementRadius; } }
+        private float m_movementRadius;
+        public float MovementRadius { get { return m_movementRadius; } }
         
         private Vector3 m_initialPosition;
         public Vector3 InitialPosition { get { return m_initialPosition; } }
@@ -25,15 +25,26 @@ namespace GameServices.MobileInputService
         {
             m_initialPosition = transform.position;
 
-            var renderMode = GetComponentInParent<Canvas>().renderMode;
+            Canvas canvas = GetComponentInParent<Canvas>();
+
+            var renderMode = canvas.renderMode;
             if (renderMode == RenderMode.ScreenSpaceOverlay)
             {
                 m_isUsingWorldPosition = false;
             }
-            else
+            else if (renderMode == RenderMode.ScreenSpaceCamera)
             {
                 m_isUsingWorldPosition = true;
                 m_canvasCamera = GetComponentInParent<Canvas>().worldCamera;
+
+                if (m_canvasCamera.orthographic == false)
+                {
+                    Debug.LogError("VirtualJoyStick should only be used in ScreenSpaceCamera canvas with orthographic camera!", m_canvasCamera);
+                }
+            }
+            else // world space canvas
+            {
+                Debug.LogError("VirtualJoyStick should not be used with world space canvas!", canvas);
             }
         }
 
@@ -50,7 +61,7 @@ namespace GameServices.MobileInputService
             }
 
             Vector2 delta = new Vector2(touchPosition.x - InitialPosition.x, touchPosition.y - InitialPosition.y);
-
+            
             if (delta.magnitude > m_movementRadius)
             {
                 delta = delta.normalized * m_movementRadius;
